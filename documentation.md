@@ -2,17 +2,14 @@
 # Project Name
 
 ## Introduction
-Briefly describe what the project does and its purpose.
+Provide a brief overview of the project, its purpose, and its main features.
 
 ## Installation
-Provide a step-by-step guide on how to install and set up the project.
+Instructions on how to install and set up the project.
 
 ## Usage
-Explain how to use the project, including code examples if necessary.
-
-## Contributing
-Outline how others can contribute to the project.
+Examples and explanations on how to use the project.
 
 ## License
-Specify the license under which the project is distributed.
+Information about the project's license.
 ```
