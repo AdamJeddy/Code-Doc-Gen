@@ -4,10 +4,10 @@
 Briefly describe what the project does and its purpose.
 
 ## Installation
-Provide a step-by-step guide on how to install the project.
+Provide a step-by-step guide on how to install and set up the project.
 
 ## Usage
-Explain how to use the project, including code examples if necessary.
+Explain how to use the project, including code examples and expected outcomes.
 
 ## Contributing
 Outline how others can contribute to the project.
