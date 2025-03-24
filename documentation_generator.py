@@ -140,7 +140,10 @@ def list_repo_files() -> str:
 
 @tool
 def github_documentation_commit(commit_message=""):
-    """Commits the current changes to the 'documentation' branch of the Github repository."""
+    """
+    Commits the current changes to the 'documentation' branch of the Github repository.
+    This tool is designed to be used after updating the documentation file.
+    """
     branch_name = "documentation"
     commit_message_main = f"{commit_message} - {datetime.now().strftime('%d-%m-%y %H:%M:%S')}"
     
@@ -216,7 +219,9 @@ def create_file_tool(file_contents: str, file_path: str) -> str:
 
 @tool
 def check_document_file_exists() -> str:
-    """Checks if the repository has a file named 'documentation.md'."""
+    """
+    Checks if the repository has a file named 'documentation.md'.    
+    """
     if os.path.isfile("documentation.md"):
         return "File 'documentation.md' exists"
     else:
@@ -260,7 +265,8 @@ def run_agent():
         - **Markdown Fences:** Do **not** wrap the output in triple backticks (```) or other code blocks.
         - **Git Handling:** 
           - Create a new branch named **'{DOC_BRANCH}'**.
-          - Commit and push the new documentation to the repository.
+          - Commit the new documentation to the repository.
+          - Push the new documentation to the repository
         """
 
     else:
@@ -284,7 +290,7 @@ def run_agent():
         {chr(10).join(new_commits)}
 
         ## Code Changes Summary:
-        {diff_details[:5000]}  <!-- Limiting output to avoid exceeding token limits -->
+        {diff_details[:10000]}  <!-- Limiting output to avoid exceeding token limits -->
 
         ## Update Instructions:
         - **Enhance Documentation:** Incorporate these changes into the documentation.
@@ -297,7 +303,8 @@ def run_agent():
         - **Markdown Fences:** Do **not** wrap the output in triple backticks (```) or other code blocks.
         - **Git Handling:** 
           - Update the documentation in the **'{DOC_BRANCH}'** branch.
-          - Commit and push the updated documentation to the repository.
+          - Commit the new documentation to the repository.
+          - Push the new documentation to the repository
         """
 
     # Initialize and invoke the agent with the dynamic prompt
