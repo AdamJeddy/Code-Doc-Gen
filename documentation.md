@@ -27,6 +27,12 @@ This project is designed for the Chalhoub Group Tech Case Study. It includes var
   - `to_uppercase(string)`: Converts a string to uppercase.
 
 ## Last Documented Commit
+
+## Updates
+## Updates
+
+No new changes have been made since the last update.
+
 Last Documented Commit: <commit_hash>
 
-Last Documented Commit: b1941e00a11559d09184adbead2d11ee20585e8d
+Last Documented Commit: 24b81ca1f7d8679a09cf43ec63f79117baa20a04
