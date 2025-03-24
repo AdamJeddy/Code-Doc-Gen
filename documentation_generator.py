@@ -8,6 +8,7 @@ from langchain.tools import tool
 from langchain.tools import StructuredTool
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
+import re
 
 # Configurations
 DOCUMENTATION_FILE = "documentation.md"
@@ -27,6 +28,32 @@ llm = ChatOpenAI(model='gpt-4o', temperature=0, api_key=os.getenv("OPENAI_API_KE
 ## Git Helper & File Functions ##
 #################################
 
+def update_sections(existing_content, changes):
+    """
+    Updates specific sections of the documentation based on detected changes.
+    """
+
+    # Update File Structure section
+    if changes["added"] or changes["deleted"]:
+        existing_content = re.sub(
+            r"(## File Structure.*?)\n\n",
+            f"\\1\n\n### Changes:\n- Added: {', '.join(changes['added'])}\n- Deleted: {', '.join(changes['deleted'])}\n\n",
+            existing_content,
+            flags=re.DOTALL
+        )
+
+    # Update Features & Important Functions if code files are modified
+    if changes["modified"]:
+        modified_files_summary = "\n".join([f"- {file}" for file in changes["modified"]])
+        existing_content = re.sub(
+            r"(## Features & Important Functions.*?)\n\n",
+            f"\\1\n\n### Updated Features:\n{modified_files_summary}\n\n",
+            existing_content,
+            flags=re.DOTALL
+        )
+
+    return existing_content
+
 def get_last_documented_commit(file_path="documentation.md"):
     """Extracts the last documented commit hash from the documentation file."""
     if not os.path.isfile(file_path):
@@ -38,7 +65,7 @@ def get_last_documented_commit(file_path="documentation.md"):
                 return line.split(":", 1)[1].strip()
     return None
 
-def get_new_commits(since_commit):
+def get_new_commits(since_commit=None):
     """Returns a list of commit messages and hashes since the provided commit."""
     if since_commit:
         cmd = ["git", "log", f"{since_commit}..HEAD", "--oneline"]
@@ -53,7 +80,7 @@ def get_new_commits(since_commit):
         logging.error("Error retrieving git log: " + e.stderr)
         return []
 
-def get_diff_since_commit(since_commit):
+def get_diff_since_commit(since_commit=None):
     """Returns the diff of changes since the provided commit."""
     if not since_commit:
         # No commit provided, diff from the beginning (or current working tree)
@@ -65,6 +92,28 @@ def get_diff_since_commit(since_commit):
     except subprocess.CalledProcessError as e:
         logging.error("Error retrieving git diff: " + e.stderr)
         return ""
+
+def get_structured_git_diff(since_commit):
+    """Parses git diff into structured categories: added, modified, deleted files."""
+    cmd = ["git", "diff", "--name-status", f"{since_commit}..HEAD"]
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        changes = result.stdout.strip().split("\n")
+
+        categorized_changes = {"added": [], "modified": [], "deleted": []}
+
+        for change in changes:
+            if change.startswith("A"):
+                categorized_changes["added"].append(change[2:])
+            elif change.startswith("M"):
+                categorized_changes["modified"].append(change[2:])
+            elif change.startswith("D"):
+                categorized_changes["deleted"].append(change[2:])
+
+        return categorized_changes
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error retrieving git diff: {e.stderr}")
+        return {"added": [], "modified": [], "deleted": []}
 
 def get_repo_overview():
     """
@@ -177,40 +226,33 @@ def create_file_tool(file_contents: str, file_path: str) -> str:
     "## Updates" sections and commit markers. It then appends a single new "## Updates"
     section with the provided update content and a single new commit marker at the end.
     """
-    # Remove any formatting if present
     if file_contents.startswith("```") and file_contents.endswith("```"):
         file_contents = file_contents.strip("```").strip()
 
-    # Get the latest commit hash
     try:
         head_commit = subprocess.run(["git", "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
     except subprocess.CalledProcessError as e:
-        logging.error("Error retrieving HEAD commit: " + e.stderr)
+        logging.error(f"Error retrieving HEAD commit: {e.stderr}")
         head_commit = "unknown"
-    
+
     new_marker_line = f"Last Documented Commit: {head_commit}"
 
     if os.path.isfile(file_path):
-        # Read the existing file content
         with open(file_path, "r", encoding="utf-8") as f:
             existing_content = f.read()
-        
-        # Remove old commit marker & extra "## Updates" headings
-        existing_content = "\n".join([
-            line for line in existing_content.split("\n") 
-            if not line.startswith("Last Documented Commit:") and line.strip() != "## Updates"
-        ])
-        
-        # Append the new update section only if there are updates
-        if file_contents.strip():
-            updated_content = f"{existing_content}\n\n## Updates\n{file_contents.strip()}\n\n{new_marker_line}"
-        else:
-            updated_content = f"{existing_content}\n\n{new_marker_line}"
+
+        # Extract structured diffs
+        last_commit = get_last_documented_commit(file_path)
+        changes = get_structured_git_diff(last_commit)
+
+        # Update relevant sections
+        updated_content = update_sections(existing_content, changes)
+
+        # Replace commit marker
+        updated_content = re.sub(r"Last Documented Commit: \w+", new_marker_line, updated_content)
     else:
-        # Create a fresh documentation file
         updated_content = f"{file_contents.strip()}\n\n{new_marker_line}"
 
-    # Write updated content
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(updated_content)
 
@@ -287,7 +329,7 @@ def run_agent():
         The documentation was last updated at commit **{last_commit}**. Since then, the following changes have been made:
 
         ## Recent Commits:
-        {chr(10).join(new_commits)}
+        {new_commits}
 
         ## Code Changes Summary:
         {diff_details[:10000]}  <!-- Limiting output to avoid exceeding token limits -->
@@ -296,15 +338,15 @@ def run_agent():
         - **Enhance Documentation:** Incorporate these changes into the documentation.
         - **New Section:** Add an **'Updates'** section summarizing these changes.
         - **Commit Tracking:** Replace the existing commit marker with:
-          ```
-          Last Documented Commit: <commit_hash>
-          ```
+        ```
+        Last Documented Commit: <commit_hash>
+        ```
         - **File Name:** `{DOCUMENTATION_FILE}`
         - **Markdown Fences:** Do **not** wrap the output in triple backticks (```) or other code blocks.
         - **Git Handling:** 
-          - Update the documentation in the **'{DOC_BRANCH}'** branch.
-          - Commit the new documentation to the repository.
-          - Push the new documentation to the repository
+        - Update the documentation in the **'{DOC_BRANCH}'** branch.
+        - Commit the new documentation to the repository.
+        - Push the new documentation to the repository.
         """
 
     # Initialize and invoke the agent with the dynamic prompt
