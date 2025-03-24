@@ -96,16 +96,34 @@ def github_documentation_commit(commit_message=""):
 
 def create_file_tool(file_contents: str, file_path: str) -> str:
     """
-    Function that creates/updates a markdown file with the contents provided as input 
-    and file path provided as inputs
+    Creates or updates a markdown file with the provided contents.
+    It appends a marker line with the latest commit hash for reference.
     """
-    
     # Remove any Markdown formatting if present
     if file_contents.startswith("```") and file_contents.endswith("```"):
         file_contents = file_contents.strip("```").strip()
     
+    # Obtain the current HEAD commit hash
+    try:
+        head_commit = subprocess.run(["git", "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
+    except subprocess.CalledProcessError as e:
+        logging.error("Error retrieving HEAD commit: " + e.stderr)
+        head_commit = "unknown"
+    
+    # Append/update the marker for the last documented commit
+    marker_line = f"\n\nLast Documented Commit: {head_commit}"
+    # Optionally, remove any old marker before appending 
+    if os.path.isfile(file_path):
+        with open(file_path, "r") as f:
+            content = f.read()
+        # Remove previous marker if exists
+        content = "\n".join([line for line in content.split("\n") if not line.startswith("Last Documented Commit:")])
+    else:
+        content = ""
+    
+    new_content = file_contents + marker_line
     with open(file_path, "w") as f:
-        f.write(file_contents)
+        f.write(new_content)
     
     return "File updated"
 
