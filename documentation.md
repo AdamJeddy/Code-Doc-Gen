@@ -1,21 +1,21 @@
 # Documentation
 
 ## Overview
-This repository is part of the Code-Doc-Gen Project for the Chalhoub Group Tech Case Study. It contains a variety of Python scripts and resources for performing string, math, and file operations, as well as a Jupyter notebook for documentation generation.
+This repository is part of the Code-Doc-Gen Project for the Chalhoub Group Tech Case Study. It contains a template for generating documentation from code.
 
 ## File Structure
-- **.gitignore**: Specifies files and directories to be ignored by Git.
-- **string_operations.py**: Contains functions for string manipulation, such as concatenation and converting strings to uppercase.
-- **main.py**: The main entry point of the application, which prints 'Hello, World!'.
-- **README.md**: Provides an overview of the Code-Doc-Gen Project.
-- **math_operations.py**: Implements basic math operations, including an addition function.
-- **file_operations.py**: Includes functions for reading from and writing to files.
-- **.git/**: Directory containing Git version control information.
-- **langchain_github_documenter.ipynb**: Jupyter notebook for generating documentation using Langchain.
+- **.gitignore**: Specifies files and directories to be ignored by git.
+- **string_operations.py**: Contains functions for string manipulation, such as `concatenate` and `to_uppercase`.
+- **main.py**: The main entry point of the application, which prints "Hello, World!".
+- **README.md**: Provides an overview of the project.
+- **math_operations.py**: Implements basic math operations, including an `add` function.
+- **file_operations.py**: Contains functions for file reading and writing.
+- **.git/**: Directory containing git metadata.
+- **langchain_github_documenter.ipynb**: Jupyter notebook for documenting GitHub repositories using Langchain.
 - **requirements.txt**: Lists the Python dependencies required for the project.
 
 ## Features & Important Functions
-- **String Operations**:
+- **String Operations**: 
   - `concatenate(str1, str2)`: Concatenates two strings.
   - `to_uppercase(string)`: Converts a string to uppercase.
 - **Math Operations**:
@@ -27,4 +27,4 @@ This repository is part of the Code-Doc-Gen Project for the Chalhoub Group Tech 
 ## Last Documented Commit
 Last Documented Commit: <commit_hash>
 
-Last Documented Commit: 2b30b63ce0c04650231af572a9b43e59d96a7b06
+Last Documented Commit: 83ede277031effd31e20af88318506d398969207
