@@ -75,6 +75,8 @@ def get_repo_overview():
         items = result.stdout.strip().split("\n")[:10]
         overview += "Top-level items:\n"
         for item in items:
+            if item == "documentation_generator.py":
+                continue
             if os.path.isdir(item):
                 overview += f"\n- {item}/ (directory)"
             else:
