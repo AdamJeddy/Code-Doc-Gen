@@ -62,6 +62,21 @@ def get_diff_since_commit(since_commit):
         logging.error("Error retrieving git diff: " + e.stderr)
         return ""
 
+def get_repo_overview():
+    """
+    Reads the repository structure and main files to provide a high-level overview.
+    This is a simple placeholder implementation. later extend it to read key files,
+    extract README content, or analyze main modules.
+    """
+    overview = "Repository Overview:\n"
+    # List the top-level files and directories
+    try:
+        result = subprocess.run(["ls", "-1"], check=True, capture_output=True, text=True)
+        items = result.stdout.strip().split("\n")
+        overview += "Top-level items:\n" + "\n".join(items)
+    except subprocess.CalledProcessError as e:
+        overview += "Error reading repository structure."
+    return overview
 
 ###################
 ## Tools Section ##
