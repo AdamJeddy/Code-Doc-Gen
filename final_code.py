@@ -1,6 +1,7 @@
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 import os
+import logging
 import subprocess
 from datetime import datetime
 from langchain.tools import tool
@@ -145,12 +146,29 @@ tools = [github_documentation_commit, create_file_tool, check_document_file_exis
 ## Agent Section ##
 ###################
 
+# Determine what has changed since the last documentation update
+last_commit = get_last_documented_commit("documentation.md")
+new_commits = get_new_commits(last_commit)
+diff_details = get_diff_since_commit(last_commit)
+
+# Build a dynamic prompt including new commit info and diff
+prompt_template = f"""
+There have been the following code changes since the last documentation update:
+New Commits:
+{chr(10).join(new_commits)}
+
+Diff Summary:
+{diff_details[:1000]}  <!-- Truncated to avoid overwhelming the prompt -->
+
+Based on these changes, generate updated documentation in markdown format. 
+Do not wrap the output in markdown fences. The file name should be documentation.md.
+Include an updated marker with the latest commit hash as the last line in the file.
+"""
+
+
 agent_executor = initialize_agent(
     tools, llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True
 )
 
-agent_executor.invoke(
-    {
-        "input": "Write a basic code documentation in markdown format with the file name as documentation.md. Output ONLY THE MARKDOWN without wrapping it in ```. Commit changes to branch called documentation with an appropriate commit message."
-    }
-)
+# Invoke the agent with the dynamic prompt
+agent_executor.invoke({"input": prompt_template})
