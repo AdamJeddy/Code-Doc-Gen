@@ -68,21 +68,29 @@ def get_diff_since_commit(since_commit):
 
 @tool
 def github_documentation_commit(commit_message=""):
-    """ Commits the current changes to the 'documentation' branch of the Github repository """
+    """Commits the current changes to the 'documentation' branch of the Github repository."""
     branch_name = "documentation"
     commit_message_main = f"{commit_message} - {datetime.now().strftime('%d-%m-%y %H:%M:%S')}"
     
-    # Switchs to the "documentation" branch (or Creates it if it doesn't exist)
-    subprocess.run(["git", "checkout", "-B", branch_name])
-    
-    # Add only .md files
-    subprocess.run(["git", "add", "*.md"])
-    
-    # Commit with the message
-    subprocess.run(["git", "commit", "-m", commit_message_main])
-    
-    # Push to the remote repository
-    subprocess.run(["git", "push", "-u", "origin", branch_name])
+    try:
+        # Switch to the "documentation" branch (or create it if it doesn't exist)
+        result = subprocess.run(["git", "checkout", "-B", branch_name], check=True, capture_output=True, text=True)
+        logging.info(result.stdout)
+        
+        # Add only .md files
+        result = subprocess.run(["git", "add", "*.md"], check=True, capture_output=True, text=True)
+        logging.info(result.stdout)
+        
+        # Commit with the message
+        result = subprocess.run(["git", "commit", "-m", commit_message_main], check=True, capture_output=True, text=True)
+        logging.info(result.stdout)
+        
+        # Push to the remote repository
+        result = subprocess.run(["git", "push", "-u", "origin", branch_name], check=True, capture_output=True, text=True)
+        logging.info(result.stdout)
+    except subprocess.CalledProcessError as e:
+        logging.error("An error occurred during Git operations: " + e.stderr)
+        return "Failed to commit documentation"
     
     return "Committed to Github on branch 'documentation'"
 
