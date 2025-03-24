@@ -18,6 +18,50 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 llm = ChatOpenAI(model='gpt-4o', temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
 
 
+#########################
+## Git Helper Functions##
+#########################
+
+def get_last_documented_commit(file_path="documentation.md"):
+    """Extracts the last documented commit hash from the documentation file."""
+    if not os.path.isfile(file_path):
+        return None
+    with open(file_path, "r") as f:
+        for line in f:
+            if line.startswith("Last Documented Commit:"):
+                # Expecting a line like: "Last Documented Commit: <commit_hash>"
+                return line.split(":", 1)[1].strip()
+    return None
+
+def get_new_commits(since_commit):
+    """Returns a list of commit messages and hashes since the provided commit."""
+    if since_commit:
+        cmd = ["git", "log", f"{since_commit}..HEAD", "--oneline"]
+    else:
+        # If no last commit found, return the full log.
+        cmd = ["git", "log", "--oneline"]
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        commits = result.stdout.strip().split("\n")
+        return commits if commits != [''] else []
+    except subprocess.CalledProcessError as e:
+        logging.error("Error retrieving git log: " + e.stderr)
+        return []
+
+def get_diff_since_commit(since_commit):
+    """Returns the diff of changes since the provided commit."""
+    if not since_commit:
+        # No commit provided, diff from the beginning (or current working tree)
+        since_commit = ""
+    cmd = ["git", "diff", f"{since_commit}..HEAD"]
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        return result.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        logging.error("Error retrieving git diff: " + e.stderr)
+        return ""
+
+
 ###################
 ## Tools Section ##
 ################### 
