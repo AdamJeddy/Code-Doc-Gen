@@ -34,4 +34,4 @@ This repository contains a tool that automatically generates and updates documen
 
 Last Documented Commit: <commit_hash>
 
-Last Documented Commit: f2e74b93a59c1915f39588d94fa1b9d02a5c728d
+Last Documented Commit: 36805ee9acb7aab704d2c511b76cad7ebd2a745d
