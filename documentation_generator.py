@@ -122,36 +122,58 @@ def github_documentation_commit(commit_message=""):
 
 def create_file_tool(file_contents: str, file_path: str) -> str:
     """
-    Creates or updates a markdown file with the provided contents.
-    It appends a marker line with the latest commit hash for reference.
+    Creates or updates a markdown file with new update content.
+    If the file already exists, this function preserves the existing content
+    (such as Overview and File Structure sections) while removing any existing
+    "## Updates" sections and commit markers. It then appends a single new "## Updates"
+    section with the provided update content and a single new commit marker at the end.
     """
     # Remove any Markdown formatting if present
     if file_contents.startswith("```") and file_contents.endswith("```"):
         file_contents = file_contents.strip("```").strip()
-    
+
     # Obtain the current HEAD commit hash
     try:
-        head_commit = subprocess.run(["git", "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            check=True, capture_output=True, text=True
+        ).stdout.strip()
     except subprocess.CalledProcessError as e:
         logging.error("Error retrieving HEAD commit: " + e.stderr)
         head_commit = "unknown"
-    
-    # Append/update the marker for the last documented commit
-    marker_line = f"\n\nLast Documented Commit: {head_commit}"
-    # Optionally, remove any old marker before appending
+    new_marker_line = f"Last Documented Commit: {head_commit}"
+
     if os.path.isfile(file_path):
-        with open(file_path, "r") as f:
-            content = f.read()
-        # Remove previous marker if exists
-        content = "\n".join([line for line in content.split("\n") if not line.startswith("Last Documented Commit:")])
+        # Read the existing file content
+        with open(file_path, "r", encoding="utf-8") as f:
+            existing_content = f.read()
+        
+        # Split the file into lines and remove lines that are duplicate updates headings or commit markers
+        lines = existing_content.split("\n")
+        filtered_lines = []
+        for line in lines:
+            stripped = line.strip()
+            # Remove any line that is exactly an "Updates" heading or starts with the commit marker
+            if stripped == "## Updates" or stripped.startswith("Last Documented Commit:"):
+                continue
+            filtered_lines.append(line)
+        base_content = "\n".join(filtered_lines).rstrip()
+
+        # Append the new Updates section only if there is update content
+        if file_contents.strip():
+            updated_content = f"{base_content}\n\n## Updates\n{file_contents.strip()}\n\n{new_marker_line}"
+        else:
+            updated_content = f"{base_content}\n\n{new_marker_line}"
     else:
-        content = ""
-    
-    new_content = file_contents + marker_line
-    with open(file_path, "w") as f:
-        f.write(new_content)
-    
+        # File doesn't exist; create new content with update section and marker.
+        updated_content = f"{file_contents.strip()}\n\n{new_marker_line}"
+
+    # Write the updated content back to the file
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(updated_content)
+
     return "File updated"
+
 
 @tool
 def check_document_file_exists() -> str:
