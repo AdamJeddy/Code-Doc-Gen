@@ -9,6 +9,10 @@ from langchain.tools import StructuredTool
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
 
+# Configurations
+DOCUMENTATION_FILE = "documentation.md"
+DOC_BRANCH = "documentation"
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -192,63 +196,66 @@ tools = [github_documentation_commit, create_file_tool, check_document_file_exis
 ## Agent Section    ##
 ######################
 
-# Check for last documented commit
-last_commit = get_last_documented_commit("documentation.md")
+def run_agent():
+    # Check for last documented commit
+    last_commit = get_last_documented_commit(DOCUMENTATION_FILE)
+    
+    # Build the dynamic prompt based on whether a documentation file already exists
+    if last_commit is None:
+        # No documentation exists, so we generate a fresh overview
+        repo_overview = get_repo_overview()
+        prompt_template = f"""
+        This repository does not yet have a documentation file. Based on the following repository overview, generate comprehensive documentation in markdown format.
+        
+        {repo_overview}
+        
+        The documentation should include sections such as Overview, File Structure, Features & Important Functions. 
+        Ensure that the final line includes a marker with the latest commit hash in the format:
+        Last Documented Commit: <commit_hash>
+        
+        The output should be named as {DOCUMENTATION_FILE} and should not be wrapped in markdown fences.
+        
+        Make sure the document is created on a new branch called '{DOC_BRANCH}' and pushed to the remote repository.
+        """
+    else:
+        # Existing documentation found; update it based on recent changes.
+        new_commits = get_new_commits(last_commit)
+        diff_details = get_diff_since_commit(last_commit)
 
-# Build the dynamic prompt based on whether a documentation file already exists
-if last_commit is None:
-    # No documentation exists, so we generate a fresh overview
-    repo_overview = get_repo_overview()
-    prompt_template = f"""
-    This repository does not yet have a documentation file. Based on the following repository overview, generate comprehensive documentation in markdown format.
+        if not new_commits:
+            logging.info("No new commits found since the last documented commit.")
+            new_commits = ["No new commits found."]
+        if not diff_details:
+            logging.info("No diff details found since the last documented commit.")
+            diff_details = "No changes detected."
+        
+        prompt_template = f"""
+        The current documentation was last updated at commit {last_commit}.
+        Since then, the following commits have been made:
+        
+        New Commits:
+        {chr(10).join(new_commits)}
+        
+        Diff Summary:
+        {diff_details[:2000]}  <!-- This summary is truncated to avoid overwhelming the prompt -->
+        
+        Based on these recent changes, update the existing documentation in markdown format.
+        Changes should add to a section called 'Updates' that includes summary of the changes since the last documentation update. 
+        The final line of the output must include an updated marker with the latest commit hash in the following format, make sure to replace the existing marker:
+        Last Documented Commit: <commit_hash>
+        
+        The output should be named as {DOCUMENTATION_FILE} and should not be wrapped in markdown fences.
+        
+        Make sure the document is created on a new branch called '{DOC_BRANCH}' and pushed to the remote repository.
+        """
     
-    {repo_overview}
+    # Initialize and invoke the agent with the dynamic prompt
+    agent_executor = initialize_agent(
+        tools, llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True
+    )
     
-    The documentation should include sections such as Overview, File Structure, Features & Important Functions. 
-    Ensure that the final line includes a marker with the latest commit hash in the format:
-    Last Documented Commit: <commit_hash>
-    
-    The output should be named as documentation.md and should not be wrapped in markdown fences.
+    # Invoke the agent with the dynamic prompt
+    agent_executor.invoke({"input": prompt_template})
 
-    Make sure the document is created on a new branch called 'documentation' and pushed to the remote repository.
-    """
-else:
-    # Existing documentation found; update it based on recent changes.
-    new_commits = get_new_commits(last_commit)
-    diff_details = get_diff_since_commit(last_commit)
-    
-    if not new_commits:
-        logging.info("No new commits found since the last documented commit.")
-        new_commits = ["No new commits found."]
-    
-    if not diff_details:
-        logging.info("No diff details found since the last documented commit.")
-        diff_details = "No changes detected."
-    
-    prompt_template = f"""
-    The current documentation was last updated at commit {last_commit}.
-    Since then, the following commits have been made:
-    
-    New Commits:
-    {chr(10).join(new_commits)}
-    
-    Diff Summary:
-    {diff_details[:1000]}  <!-- This summary is truncated to avoid overwhelming the prompt -->
-    
-    Based on these recent changes, update the existing documentation in markdown format.
-    Changes should add to a section called 'Updates' that includes summary of the changes since the last documentation update. 
-    The final line of the output must include an updated marker with the latest commit hash in the following format:
-    Last Documented Commit: <commit_hash>
-    
-    The output should be named as documentation.md and should not be wrapped in markdown fences.
-
-    Make sure the document is created on a new branch called 'documentation' and pushed to the remote repository.
-    """
-
-# Initialize and invoke the agent with the dynamic prompt
-agent_executor = initialize_agent(
-    tools, llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True
-)
-
-# Invoke the agent with the dynamic prompt
-agent_executor.invoke({"input": prompt_template})
+if __name__ == "__main__":
+    run_agent()
