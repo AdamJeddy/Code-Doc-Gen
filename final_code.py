@@ -155,32 +155,51 @@ def check_document_file_exists() -> str:
 create_file_tool = StructuredTool.from_function(create_file_tool)
 tools = [github_documentation_commit, create_file_tool, check_document_file_exists]
 
+######################
+## Agent Section    ##
+######################
 
-
-###################
-## Agent Section ##
-###################
-
-# Determine what has changed since the last documentation update
+# Check for last documented commit
 last_commit = get_last_documented_commit("documentation.md")
-new_commits = get_new_commits(last_commit)
-diff_details = get_diff_since_commit(last_commit)
 
-# Build a dynamic prompt including new commit info and diff
-prompt_template = f"""
-There have been the following code changes since the last documentation update:
-New Commits:
-{chr(10).join(new_commits)}
+# Build the dynamic prompt based on whether a documentation file already exists
+if last_commit is None:
+    # No documentation exists, so we generate a fresh overview
+    repo_overview = get_repo_overview()
+    prompt_template = f"""
+    This repository does not yet have a documentation file. Based on the following repository overview, generate comprehensive documentation in markdown format.
+    
+    {repo_overview}
+    
+    The documentation should include sections such as Overview, File Structure, Features & Important Functions. 
+    Ensure that the final line includes a marker with the latest commit hash in the format:
+    Last Documented Commit: <commit_hash>
+    
+    The output should be named as documentation.md and should not be wrapped in markdown fences.
+    """
+else:
+    # Existing documentation found; update it based on recent changes.
+    new_commits = get_new_commits(last_commit)
+    diff_details = get_diff_since_commit(last_commit)
+    
+    prompt_template = f"""
+    The current documentation was last updated at commit {last_commit}.
+    Since then, the following commits have been made:
+    
+    New Commits:
+    {chr(10).join(new_commits)}
+    
+    Diff Summary:
+    {diff_details[:1000]}  <!-- This summary is truncated to avoid overwhelming the prompt -->
+    
+    Based on these recent changes, update the existing documentation in markdown format. 
+    The final line of the output must include an updated marker with the latest commit hash in the following format:
+    Last Documented Commit: <commit_hash>
+    
+    The output should be named as documentation.md and should not be wrapped in markdown fences.
+    """
 
-Diff Summary:
-{diff_details[:1000]}  <!-- Truncated to avoid overwhelming the prompt -->
-
-Based on these changes, generate updated documentation in markdown format. 
-Do not wrap the output in markdown fences. The file name should be documentation.md.
-Include an updated marker with the latest commit hash as the last line in the file.
-"""
-
-
+# Initialize and invoke the agent with the dynamic prompt
 agent_executor = initialize_agent(
     tools, llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True
 )
