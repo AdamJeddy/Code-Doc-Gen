@@ -11,7 +11,10 @@ from langchain.agents import AgentType
 # Load environment variables from .env file
 load_dotenv()
 
-# Create a GPT-4o model
+# Configure some basic levl of logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Creating a GPT-4o model
 llm = ChatOpenAI(model='gpt-4o', temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
 
 
