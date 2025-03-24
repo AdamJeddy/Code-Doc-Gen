@@ -68,28 +68,24 @@ def get_repo_overview():
     For each file, if it is a text file, it includes a short snippet of its content.
     Directories are indicated accordingly.
     """
-    overview = "Repository Overview:\n"
+    overview = "Repository Overview:\nTop-level items:\n"
     try:
-        # List top-level files and directories; limit to 10 items
-        result = subprocess.run(["ls", "-1"], check=True, capture_output=True, text=True)
-        items = result.stdout.strip().split("\n")[:10]
-        overview += "Top-level items:\n"
+        items = os.listdir(".")[:10]
         for item in items:
             if item == "documentation_generator.py":
                 continue
             if os.path.isdir(item):
                 overview += f"\n- {item}/ (directory)"
             else:
-                # Attempt to read the first 200 characters of the file
                 try:
                     with open(item, "r", encoding="utf-8") as f:
-                        content = f.read(200)
+                        content = f.read(2000)
                         snippet = content.strip().replace("\n", " ")[:100]
                         overview += f"\n- {item}: {snippet}..."
-                except Exception as e:
+                except Exception:
                     overview += f"\n- {item}: (binary or unreadable file)"
-    except subprocess.CalledProcessError as e:
-        overview += "Error reading repository structure."
+    except Exception as e:
+        overview += f"\nError reading repository structure: {e}"
     return overview
 
 ###################
