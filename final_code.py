@@ -145,13 +145,13 @@ def create_file_tool(file_contents: str, file_path: str) -> str:
 
 @tool
 def check_document_file_exists() -> str:
-    """Checks if the repository has a file named 'document.md'"""
-    if os.path.isfile("document.md"):
-        return "File 'document.md' exists"
+    """Checks if the repository has a file named 'documentation.md'."""
+    if os.path.isfile("documentation.md"):
+        return "File 'documentation.md' exists"
     else:
-        return "File 'document.md' does not exist"
+        return "File 'documentation.md' does not exist"
 
-
+# Convert the create_file_tool into a StructuredTool
 create_file_tool = StructuredTool.from_function(create_file_tool)
 tools = [github_documentation_commit, create_file_tool, check_document_file_exists]
 
