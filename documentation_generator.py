@@ -23,9 +23,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 llm = ChatOpenAI(model='gpt-4o', temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
 
 
-#########################
-## Git Helper Functions##
-#########################
+#################################
+## Git Helper & File Functions ##
+#################################
 
 def get_last_documented_commit(file_path="documentation.md"):
     """Extracts the last documented commit hash from the documentation file."""
@@ -92,9 +92,51 @@ def get_repo_overview():
         overview += f"\nError reading repository structure: {e}"
     return overview
 
+def get_repo_diff(since_commit):
+    """Returns a diff of changes since the provided commit."""
+    cmd = ["git", "diff", f"{since_commit}..HEAD"] if since_commit else ["git", "diff"]
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return ""
+
+def get_repo_files():
+    """Returns a list of all files in the repository."""
+    return [f for f in os.listdir(".") if os.path.isfile(f) and f != "documentation_generator.py"]
+
 ###################
 ## Tools Section ##
 ################### 
+
+@tool
+def read_file(file_path: str) -> str:
+    """Reads the content of a given file."""
+    if not os.path.isfile(file_path):
+        return f"File {file_path} not found."
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception:
+        return f"Unable to read {file_path}. Might be binary."
+
+@tool
+def write_file(file_path: str, content: str) -> str:
+    """Writes content to a file, creating or updating it."""
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(content)
+    return f"File {file_path} updated."
+
+@tool
+def get_git_diff() -> str:
+    """Returns the git diff of the repository."""
+    last_commit = get_last_documented_commit()
+    return get_repo_diff(last_commit)
+
+@tool
+def list_repo_files() -> str:
+    """Lists all files in the repository."""
+    return "\n".join(get_repo_files())
 
 @tool
 def github_documentation_commit(commit_message=""):
@@ -182,7 +224,7 @@ def check_document_file_exists() -> str:
 
 # Convert the create_file_tool into a StructuredTool
 create_file_tool = StructuredTool.from_function(create_file_tool)
-tools = [github_documentation_commit, create_file_tool, check_document_file_exists]
+tools = [github_documentation_commit, create_file_tool, check_document_file_exists, read_file, write_file, get_git_diff, list_repo_files]
 
 
 ######################
