@@ -191,11 +191,21 @@ if last_commit is None:
     Last Documented Commit: <commit_hash>
     
     The output should be named as documentation.md and should not be wrapped in markdown fences.
+
+    Make sure the document is created on a new branch called 'documentation' and pushed to the remote repository.
     """
 else:
     # Existing documentation found; update it based on recent changes.
     new_commits = get_new_commits(last_commit)
     diff_details = get_diff_since_commit(last_commit)
+    
+    if not new_commits:
+        logging.info("No new commits found since the last documented commit.")
+        new_commits = ["No new commits found."]
+    
+    if not diff_details:
+        logging.info("No diff details found since the last documented commit.")
+        diff_details = "No changes detected."
     
     prompt_template = f"""
     The current documentation was last updated at commit {last_commit}.
@@ -207,11 +217,14 @@ else:
     Diff Summary:
     {diff_details[:1000]}  <!-- This summary is truncated to avoid overwhelming the prompt -->
     
-    Based on these recent changes, update the existing documentation in markdown format. 
+    Based on these recent changes, update the existing documentation in markdown format.
+    Changes should add to a section called 'Updates' that includes summary of the changes since the last documentation update. 
     The final line of the output must include an updated marker with the latest commit hash in the following format:
     Last Documented Commit: <commit_hash>
     
     The output should be named as documentation.md and should not be wrapped in markdown fences.
+
+    Make sure the document is created on a new branch called 'documentation' and pushed to the remote repository.
     """
 
 # Initialize and invoke the agent with the dynamic prompt
