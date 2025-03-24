@@ -64,16 +64,28 @@ def get_diff_since_commit(since_commit):
 
 def get_repo_overview():
     """
-    Reads the repository structure and main files to provide a high-level overview.
-    This is a simple placeholder implementation. later extend it to read key files,
-    extract README content, or analyze main modules.
+    Reads the repository structure and provides an overview of up to 10 top-level items.
+    For each file, if it is a text file, it includes a short snippet of its content.
+    Directories are indicated accordingly.
     """
     overview = "Repository Overview:\n"
-    # List the top-level files and directories
     try:
+        # List top-level files and directories; limit to 10 items
         result = subprocess.run(["ls", "-1"], check=True, capture_output=True, text=True)
-        items = result.stdout.strip().split("\n")
-        overview += "Top-level items:\n" + "\n".join(items)
+        items = result.stdout.strip().split("\n")[:10]
+        overview += "Top-level items:\n"
+        for item in items:
+            if os.path.isdir(item):
+                overview += f"\n- {item}/ (directory)"
+            else:
+                # Attempt to read the first 200 characters of the file
+                try:
+                    with open(item, "r", encoding="utf-8") as f:
+                        content = f.read(200)
+                        snippet = content.strip().replace("\n", " ")[:100]
+                        overview += f"\n- {item}: {snippet}..."
+                except Exception as e:
+                    overview += f"\n- {item}: (binary or unreadable file)"
     except subprocess.CalledProcessError as e:
         overview += "Error reading repository structure."
     return overview
@@ -128,7 +140,7 @@ def create_file_tool(file_contents: str, file_path: str) -> str:
     
     # Append/update the marker for the last documented commit
     marker_line = f"\n\nLast Documented Commit: {head_commit}"
-    # Optionally, remove any old marker before appending 
+    # Optionally, remove any old marker before appending
     if os.path.isfile(file_path):
         with open(file_path, "r") as f:
             content = f.read()
@@ -154,6 +166,7 @@ def check_document_file_exists() -> str:
 # Convert the create_file_tool into a StructuredTool
 create_file_tool = StructuredTool.from_function(create_file_tool)
 tools = [github_documentation_commit, create_file_tool, check_document_file_exists]
+
 
 ######################
 ## Agent Section    ##
