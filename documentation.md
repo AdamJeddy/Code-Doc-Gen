@@ -1,38 +1,30 @@
-# Code-Doc-Gen Project Documentation
+# Documentation
 
 ## Overview
-This project is designed for the Chalhoub Group Tech Case Study. It includes various Python scripts and a Jupyter notebook to demonstrate different functionalities such as file operations, mathematical operations, and string manipulations.
+This repository is part of the Code-Doc-Gen Project for the Chalhoub Group Tech Case Study. It contains a variety of Python scripts and resources for performing string, math, and file operations, as well as a Jupyter notebook for documentation generation.
 
 ## File Structure
-- **README.md**: Provides a brief overview of the project.
-- **file_operations.py**: Contains functions to read from and write to files.
-- **langchain_github_documenter.ipynb**: A Jupyter notebook for documenting GitHub repositories using Langchain.
-- **main.py**: A simple script that prints "Hello, World!".
-- **math_operations.py**: Includes basic mathematical operations like addition, subtraction, and multiplication.
+- **.gitignore**: Specifies files and directories to be ignored by Git.
+- **string_operations.py**: Contains functions for string manipulation, such as concatenation and converting strings to uppercase.
+- **main.py**: The main entry point of the application, which prints 'Hello, World!'.
+- **README.md**: Provides an overview of the Code-Doc-Gen Project.
+- **math_operations.py**: Implements basic math operations, including an addition function.
+- **file_operations.py**: Includes functions for reading from and writing to files.
+- **.git/**: Directory containing Git version control information.
+- **langchain_github_documenter.ipynb**: Jupyter notebook for generating documentation using Langchain.
 - **requirements.txt**: Lists the Python dependencies required for the project.
-- **string_operations.py**: Contains functions for string concatenation and conversion to uppercase.
 
 ## Features & Important Functions
-- **File Operations**: 
-  - `read_file(file_path)`: Reads the content of a file.
-  - `write_file(file_path, content)`: Writes content to a file.
-
-- **Math Operations**:
-  - `add(a, b)`: Returns the sum of two numbers.
-  - `subtract(a, b)`: Returns the difference between two numbers.
-  - `multiply(a, b)`: Returns the product of two numbers.
-
 - **String Operations**:
   - `concatenate(str1, str2)`: Concatenates two strings.
   - `to_uppercase(string)`: Converts a string to uppercase.
+- **Math Operations**:
+  - `add(a, b)`: Returns the sum of two numbers.
+- **File Operations**:
+  - `read_file(file_path)`: Reads the content of a file.
+  - `write_file(file_path, content)`: Writes content to a file.
 
 ## Last Documented Commit
-
-## Updates
-## Updates
-
-No new changes have been made since the last update.
-
 Last Documented Commit: <commit_hash>
 
-Last Documented Commit: 24b81ca1f7d8679a09cf43ec63f79117baa20a04
+Last Documented Commit: 2b30b63ce0c04650231af572a9b43e59d96a7b06
