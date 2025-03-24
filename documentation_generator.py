@@ -68,13 +68,13 @@ def get_diff_since_commit(since_commit):
 
 def get_repo_overview():
     """
-    Reads the repository structure and provides an overview of up to 10 top-level items.
+    Reads the repository structure and provides an overview of up to 20 top-level items.
     For each file, if it is a text file, it includes a short snippet of its content.
     Directories are indicated accordingly.
     """
     overview = "Repository Overview:\nTop-level items:\n"
     try:
-        items = os.listdir(".")[:10]
+        items = os.listdir(".")[:20]
         for item in items:
             if item == "documentation_generator.py":
                 continue
@@ -83,8 +83,8 @@ def get_repo_overview():
             else:
                 try:
                     with open(item, "r", encoding="utf-8") as f:
-                        content = f.read(2000)
-                        snippet = content.strip().replace("\n", " ")[:100]
+                        content = f.read(5000)
+                        snippet = content.strip().replace("\n", " ")
                         overview += f"\n- {item}: {snippet}..."
                 except Exception:
                     overview += f"\n- {item}: (binary or unreadable file)"
@@ -132,19 +132,17 @@ def create_file_tool(file_contents: str, file_path: str) -> str:
     "## Updates" sections and commit markers. It then appends a single new "## Updates"
     section with the provided update content and a single new commit marker at the end.
     """
-    # Remove any Markdown formatting if present
+    # Remove any formatting if present
     if file_contents.startswith("```") and file_contents.endswith("```"):
         file_contents = file_contents.strip("```").strip()
 
-    # Obtain the current HEAD commit hash
+    # Get the latest commit hash
     try:
-        head_commit = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            check=True, capture_output=True, text=True
-        ).stdout.strip()
+        head_commit = subprocess.run(["git", "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
     except subprocess.CalledProcessError as e:
         logging.error("Error retrieving HEAD commit: " + e.stderr)
         head_commit = "unknown"
+    
     new_marker_line = f"Last Documented Commit: {head_commit}"
 
     if os.path.isfile(file_path):
@@ -152,27 +150,22 @@ def create_file_tool(file_contents: str, file_path: str) -> str:
         with open(file_path, "r", encoding="utf-8") as f:
             existing_content = f.read()
         
-        # Split the file into lines and remove lines that are duplicate updates headings or commit markers
-        lines = existing_content.split("\n")
-        filtered_lines = []
-        for line in lines:
-            stripped = line.strip()
-            # Remove any line that is exactly an "Updates" heading or starts with the commit marker
-            if stripped == "## Updates" or stripped.startswith("Last Documented Commit:"):
-                continue
-            filtered_lines.append(line)
-        base_content = "\n".join(filtered_lines).rstrip()
-
-        # Append the new Updates section only if there is update content
+        # Remove old commit marker & extra "## Updates" headings
+        existing_content = "\n".join([
+            line for line in existing_content.split("\n") 
+            if not line.startswith("Last Documented Commit:") and line.strip() != "## Updates"
+        ])
+        
+        # Append the new update section only if there are updates
         if file_contents.strip():
-            updated_content = f"{base_content}\n\n## Updates\n{file_contents.strip()}\n\n{new_marker_line}"
+            updated_content = f"{existing_content}\n\n## Updates\n{file_contents.strip()}\n\n{new_marker_line}"
         else:
-            updated_content = f"{base_content}\n\n{new_marker_line}"
+            updated_content = f"{existing_content}\n\n{new_marker_line}"
     else:
-        # File doesn't exist; create new content with update section and marker.
+        # Create a fresh documentation file
         updated_content = f"{file_contents.strip()}\n\n{new_marker_line}"
 
-    # Write the updated content back to the file
+    # Write updated content
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(updated_content)
 
