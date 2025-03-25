@@ -3,17 +3,36 @@ Project for Chalhoub Group Tech Case Study
 
 ## Overview
 
-This repository contains a tool that automatically generates and updates documentation for code changes in a repository using LangChain and OpenAI's GPT-4o. The tool integrates with Git to detect code changes, extract a repository overview, and update documentation. It is designed to be adaptable to any project and keeps track of updates by embedding a commit marker in the generated documentation.
+This repository contains a tool that automatically generates and updates documentation for code changes using LangChain and OpenAI's GPT-4o. The project has evolved through two main approaches:
+
+1. **Current Stable Version** (`doc_gen.py`):  
+   Implements an enhanced documentation generator that analyzes complete repository content and maintains better change tracking through structured diffs.
+
+2. **Previous Experimental Version** (`agent_version_doc_gen.py`):  
+   Initial approach using agent-based implementation (preserved for reference but not working as intended).
+
+The tool integrates with Git to detect code changes, analyzes repository content, and maintains documentation with commit tracking. Key improvements in the current version include complete repository analysis, better change detection, and more robust documentation updates.
 
 ## Code Details
 
-- **`documentation_generator.py`**  
-  Contains the core logic for:
-  - Detecting new commits and changes using Git logs and diffs.
-  - Generating a repository overview by listing key files and directories.
-  - Dynamically building prompts for the agent based on whether documentation exists.
-  - Creating or updating the documentation file (`documentation.md`) with an embedded commit marker.
-  - Committing the documentation changes to a dedicated Git branch.
+- **`doc_gen.py` (Current Version)**  
+  Implements the enhanced documentation generator with:
+  - Complete repository content analysis for initial documentation
+  - Structured diff analysis (added/modified/deleted files)
+  - Intelligent documentation updates preserving static content
+  - Enhanced Git integration with automatic branch management
+  - Exclusion of documentation file from change tracking
+
+- **`agent_version_doc_gen.py` (Archived Version)**  
+  Initial experimental approach using:
+  - Agent-based prompt generation
+  - Repository overview sampling
+  - Basic change detection
+  - Preserved for reference purposes only
+
+## Project Evolution
+
+The initial agent-based approach (`agent_version_doc_gen.py`) demonstrated functionality but had limitations in content analysis and change tracking. The current version (`doc_gen.py`) implements more robust repository analysis and maintains clearer separation between static documentation elements and dynamic updates.
 
 ## Setup
 
@@ -34,63 +53,69 @@ This repository contains a tool that automatically generates and updates documen
 
 3. **Configure Environment Variables**
 
-    Create a `.env` file in the root directory and add your OpenAI API key:
+    Create a `.env` file in the root directory with:
 
     ```env
+    OPENAI_API_KEY=<your-api-key>
     LANGSMITH_TRACING=true
     LANGSMITH_ENDPOINT=<endpoint>
     LANGSMITH_API_KEY=<key>
-    LANGSMITH_PROJECT=<project name>
-    OPENAI_API_KEY=<key>
+    LANGSMITH_PROJECT=<project-name>
     ```
 
 ## How to Run
 
-1. **Generate or Update Documentation**
+1. **Generate/Update Documentation**
 
-    Run the documentation generation script:
+    Run the current version:
 
     ```bash
-    python documentation_generator.py
+    python doc_gen.py
     ```
 
     The tool will:
-    - Check if `documentation.md` exists.
-    - If it does not exist, generate comprehensive documentation based on a repository overview (listing key files and snippets of their contents).
-    - If it exists, detect new commits and changes since the last documented commit, then update the documentation accordingly.
+    - Create initial documentation from complete repository analysis
+    - For updates: analyze changes since last documented commit
+    - Maintain persistent documentation in `documentation.md`
+    - Commit changes to `documentation` branch
 
-2. **View the Documentation**
+2. **View Documentation**
 
-    Open the generated `documentation.md` file to review the documentation (this should be created on a new branch called `documentation`). The final line of the file includes a commit marker in the format:
+    The generated `documentation.md` contains:
+    - Project overview and structure
+    - Detailed file descriptions
+    - Version-specific change history
+    - Final commit marker:  
+      `Last Documented Commit: <commit_hash>`
 
-    ```
-    Last Documented Commit: <commit_hash>
-    ```
+## Key Features
 
-## Additional Information
+- **Complete Repository Analysis**  
+  For initial documentation, analyzes all tracked files with context-aware parsing.
 
-- **LangChain Integration:**  
-  Utilizes LangChain to interface with GPT-4o for generating markdown documentation based on dynamic prompts.
+- **Intelligent Change Tracking**  
+  Uses structured diffs to categorize changes while excluding documentation file itself.
 
-- **Git Integration:**  
-  Uses Git commands via subprocess calls to retrieve commit logs, diffs, and to commit documentation updates. Error handling and logging are included to assist with troubleshooting.
+- **Context-Aware Updates**  
+  Preserves static content while dynamically updating change summaries.
 
-- **Repository Overview:**  
-  The tool generates an overview of up to 10 top-level files. For text files, it includes a short snippet (up to 200 characters) to help contextualize the purpose of each file.
+- **Git Integration**  
+  Maintains documentation in dedicated branch with automatic commits.
 
-- **Extensibility:**  
-  The modular design allows you to easily extend or customize the tool to suit different project needs or integrate with additional systems.
+- **Adaptive Prompting**  
+  Generates context-specific prompts for both initial creation and updates.
 
 ## Troubleshooting
 
-- **Git Issues:**  
-  Ensure Git is installed and the repository is properly initialized.
-  
-- **Environment Variables:**  
-  Verify that your `.env` file contains a valid OpenAI API key.
+- **Git Issues**  
+  Ensure documentation branch exists: `git checkout -b documentation`
 
-- **Dependencies:**  
-  Confirm that all dependencies are installed by checking `requirements.txt`.
+- **API Errors**  
+  Verify `.env` contains valid `OPENAI_API_KEY`
 
-- **Logging:**  
-  Review the logs output to the console for error messages during Git operations or documentation generation.
+- **File Permissions**  
+  Ensure script has read access to repository files
+
+- **Dependencies**  
+  Confirm installation with `pip freeze -r requirements.txt`
+
