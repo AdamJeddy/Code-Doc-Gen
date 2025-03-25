@@ -7,13 +7,3 @@ def add(a, b):
 # subtract function
 def subtract(a, b):
     return a - b
-
-# multiply function
-def multiply(a, b):
-    return a * b
-
-# very important to handle the case where b is 0
-def divide(a, b):
-    if b == 0:
-        raise ValueError("Cannot divide by zero")
-    return a / b
