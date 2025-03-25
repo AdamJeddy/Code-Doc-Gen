@@ -126,3 +126,20 @@ The Code-Doc-Gen project is designed to automate the generation and updating of 
 Ensure all dependencies are installed by running `pip install -r requirements.txt`.
 
 Last Documented Commit: 469eefbdb25edd1bd7a4776d20f72ba7e528526d
+
+### Recent Changes
+## Overview
+
+This document provides an overview of the project, detailing its purpose, functionality, and key features. It serves as a guide for understanding the project's structure and how to effectively utilize it.
+
+## Recent Changes
+
+### Modified Files
+
+- **documentation.md**: The documentation has been updated to reflect recent changes in the project. This includes revisions to existing content to ensure accuracy and clarity. No new files were added, and no files were deleted in this update.
+
+
+## Static Content Start
+
+
+Last Documented Commit: 7f9f705582dadcfc67c9852e0ceaab532753b74d
