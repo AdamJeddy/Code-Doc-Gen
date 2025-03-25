@@ -123,4 +123,49 @@ Ensure all dependencies are installed by running `pip install -r requirements.tx
 - **Dependencies**: Confirm that all dependencies are installed correctly.
 - **Logging**: Review console logs for error messages during Git operations or documentation generation.
 
-Last Documented Commit: 23ed53ccd4dc12e778ee1454b9dfda5879688fe7
+```markdown
+# Project Documentation
+
+## Overview
+
+This project is designed to [briefly describe the purpose of the project]. It includes various components and scripts to facilitate [describe functionalities].
+
+## Recent Changes
+
+### Added
+
+- **`doc_gen.py`**: A new script has been added to the project. This script is responsible for generating documentation automatically. It parses the codebase and extracts relevant information to create or update documentation files. This addition aims to streamline the documentation process and ensure consistency across the project.
+
+### Modified
+
+- **`documentation.md`**: The documentation file has been updated to reflect recent changes in the project. This includes the addition of the "Recent Changes" section and updates to other sections to ensure accuracy and relevance.
+
+### Deleted
+
+- **`.env`**: The `.env` file has been removed from the project. Ensure that any environment variables previously stored in this file are now managed through other means, such as a configuration management tool or environment-specific settings.
+
+## Getting Started
+
+[Include any relevant instructions for setting up the project, installing dependencies, and running the application.]
+
+## Usage
+
+[Provide details on how to use the project, including any command-line instructions or examples.]
+
+## Contributing
+
+[Outline the process for contributing to the project, including any guidelines for submitting issues or pull requests.]
+
+## License
+
+[Include licensing information here.]
+
+## Contact
+
+[Provide contact information or links to relevant communication channels.]
+
+```
+
+**Note**: Ensure that any specific details from the previous documentation are preserved and updated as necessary. This template provides a structure for incorporating the recent changes into the existing documentation. Adjust the content to fit the specific context and details of your project.
+
+Last Documented Commit: 9bd05a8ead524aea5168ec2bd9264124b198f01f
