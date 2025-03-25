@@ -96,4 +96,54 @@ For a complete list of dependencies, refer to the `package.json` file.
 
 This documentation provides a comprehensive overview of the project, its structure, and usage. For further details, please refer to the code comments and the README file.
 
-Last Documented Commit: 23c9641432143e3e558fc2ea7421a3b3073eb9d2
+To update the existing documentation with the specified changes, follow these steps:
+
+1. **Identify the Modified Sections:**
+   - Review the `documentation.md` file to identify sections that have been modified. Since no specific details about the modifications are provided, you will need to compare the current version with the previous version to pinpoint the changes.
+
+2. **Update Relevant Sections:**
+   - For each identified modification, update the relevant sections in the documentation. Ensure that the updates are clear, concise, and maintain the integrity of the existing content. If the modifications involve new features, bug fixes, or enhancements, describe them in detail.
+
+3. **Add a 'Recent Changes' Section:**
+   - At the end of the `documentation.md` file, add a new section titled "Recent Changes." This section should summarize the modifications made to the document. Include the date of the update and a brief description of the changes.
+
+Here is an example of how the updated documentation might look:
+
+```markdown
+# Documentation
+
+## Introduction
+[Preserve existing content here]
+
+## Features
+[Preserve existing content here]
+
+## Installation
+[Preserve existing content here]
+
+## Usage
+[Preserve existing content here]
+
+## Troubleshooting
+[Preserve existing content here]
+
+## Recent Changes
+
+### [Date of Update]
+- **Modified Sections:**
+  - [Section Name]: Briefly describe the modification made. For example, "Updated the installation instructions to include new dependencies."
+  - [Section Name]: Briefly describe the modification made. For example, "Revised the usage examples to reflect the latest API changes."
+
+[Add more entries as needed based on the modifications]
+
+```
+
+4. **Review and Finalize:**
+   - After making the updates, review the entire document to ensure consistency and accuracy. Check for any grammatical errors or formatting issues.
+
+5. **Save and Distribute:**
+   - Save the updated `documentation.md` file and distribute it to relevant stakeholders or users who need access to the latest documentation.
+
+By following these steps, you will ensure that the documentation is up-to-date and accurately reflects the recent changes made to the file.
+
+Last Documented Commit: b36c0b7c174e6a01b480bcba327457f1db88e103
