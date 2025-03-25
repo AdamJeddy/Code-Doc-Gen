@@ -24,7 +24,7 @@ def get_current_commit_hash():
         return None
 
 def get_structured_diff(last_commit):
-    """Get structured diff since last documented commit"""
+    """Get structured diff since last documented commit, excluding documentation.md"""
     if not last_commit:
         return {"added": [], "modified": [], "deleted": []}
     
@@ -41,6 +41,11 @@ def get_structured_diff(last_commit):
         if not line:
             continue
         status, path = line.split(maxsplit=1)
+
+        # **Exclude documentation.md**
+        if path == DOCUMENTATION_FILE:
+            continue
+
         if status == 'A':
             changes['added'].append(path)
         elif status == 'M':
@@ -184,12 +189,15 @@ The changes are as follows:
 - Deleted files: {changes['deleted']}
 
 Using this context, update the documentation to accurately reflect these changes.
-**Important Instructions:**
-- Do not include any generic placeholder text or any markdown wrappers such as '```markdown'.
-- Only update the dynamic sections (such as the Overview and Recent Changes).
-- Do not repeat static sections (like Usage, Contributing, License, Contact) that are already present.
-- Provide a concise summary for the "Recent Changes" section, including a brief description of what was added, modified, or deleted.
-- Output the updated content in Markdown.
+### **Important Instructions:**
+- Provide **a detailed summary** of each modified file, explaining what was changed (and why if you can, if not then dont make it up).
+- For **added files**, describe their purpose and how they fit into the project.
+- For **deleted files**, note if their functionality was removed or replaced.
+- Ensure that the **Recent Changes** section is listing changes per file with a **brief explanation**.
+- Do **not** include any generic placeholder text or markdown wrappers like '```markdown'.
+- Only update the **dynamic sections** (such as the Overview and Recent Changes).
+- Do **not** modify or include static sections (like Usage, Contributing, License, Contact).
+- Output the updated content in **Markdown format** with clear section headers.
 """
         print(context)
         print(prompt)
