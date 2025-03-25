@@ -56,23 +56,29 @@ def generate_documentation_content(context):
 
 def update_documentation_file(new_content, current_content=None):
     """
-    Updates the documentation file. If current_content exists, only update the dynamic sections:
-    - Overview and project-specific sections.
-    - "Recent Changes" section should be updated/merged without duplicating static sections.
+    Updates the documentation file.
+    - If no current content exists, it creates a new file with dynamic and static sections.
+    - If current content exists, it updates only the dynamic part (which includes Overview and Recent Changes)
+      and preserves the static part (Usage, Contributing, License, Contact).
+    - It also removes placeholder text and avoids duplicating the recent changes on every run.
     """
     new_commit_marker = f"Last Documented Commit: {get_current_commit_hash()}"
     
-    # If no current content exists, just output new content with commit marker.
+    # Clean up new_content: remove any placeholder markers
+    new_content = re.sub(r"\[.*?describe.*?\]", "", new_content, flags=re.IGNORECASE).strip()
+
+    # Remove any "```markdown" wrappers from new_content
+    new_content = new_content.replace("```markdown", "")
+
+    
+    # If no existing content, create a document with clear markers:
     if not current_content:
-        return f"{new_content}\n\n{new_commit_marker}"
+        # Build a new document with dynamic and static sections
+        dynamic_section = new_content + "\n"
+        static_section = ""
+        return f"# Code-Doc-Gen Project Documentation\n\n{dynamic_section}{static_section}\n{new_commit_marker}"
     
-    # Otherwise, parse the current documentation into two parts:
-    # 1. The static part (e.g. Usage, Contributing, License, Contact) that should remain untouched.
-    # 2. The dynamic part (Overview, File Structure, Recent Changes) that will be updated.
-    # You can use a delimiter (e.g. a specific marker) to separate these.
-    # For example, assume the dynamic section starts with a marker "## Dynamic Content Start"
-    # and static content follows a marker "## Static Content Start".
-    
+    # Otherwise, split the current content into dynamic and static parts.
     dynamic_marker = "## Dynamic Content Start"
     static_marker = "## Static Content Start"
     
@@ -80,32 +86,27 @@ def update_documentation_file(new_content, current_content=None):
         dynamic_part = current_content.split(static_marker)[0]
         static_part = current_content.split(static_marker)[1]
     else:
-        # Fallback: if no markers exist, assume the whole document is dynamic.
+        # Fallback: treat entire content as dynamic if markers are missing.
         dynamic_part = current_content
         static_part = ""
     
-    # Remove any placeholders from new_content
-    new_content = re.sub(r"\[.*?briefly describe.*?\]", "", new_content, flags=re.IGNORECASE)
-    
-    # Update the dynamic section:
-    # Instead of appending a whole new "Recent Changes" section at the end,
-    # find an existing "Recent Changes" section and merge new changes.
-    # For example, extract the existing recent changes block if present:
-    recent_changes_pattern = r"(## Recent Changes\s*\n)(.*?)(\n## |\Z)"
+    # Update the "Recent Changes" section within the dynamic part:
+    # Look for an existing "## Recent Changes" header in dynamic_part.
+    recent_changes_pattern = r"(## Recent Changes\s*\n)(.*?)(?=\n##|\Z)"
     match = re.search(recent_changes_pattern, dynamic_part, flags=re.DOTALL)
     
-    if match:
-        header, existing_changes, tail = match.groups()
-        # Prepare new recent changes block (could be a summary of the changes)
-        new_recent_changes = f"{header}{new_content.strip()}\n"  # new changes overwrite old for demo purpose
-        # Replace the existing recent changes section with the new one.
-        updated_dynamic = re.sub(recent_changes_pattern, new_recent_changes + tail, dynamic_part, flags=re.DOTALL)
-    else:
-        # If no Recent Changes section exists, append one to the dynamic part.
-        updated_dynamic = dynamic_part.strip() + f"\n\n## Recent Changes\n{new_content.strip()}\n"
+    # Build a new recent changes summary (you can extend this to include descriptions, commit messages, etc.)
+    new_changes_summary = f"### Recent Changes\n{new_content}\n"
     
-    # Combine the updated dynamic part, static part, and new commit marker.
-    updated_content = f"{updated_dynamic}\n\n## Static Content Start\n{static_part.strip()}\n\n{new_commit_marker}"
+    if match:
+        # Replace the existing recent changes section with the new summary.
+        dynamic_updated = re.sub(recent_changes_pattern, new_changes_summary, dynamic_part, flags=re.DOTALL)
+    else:
+        # If no recent changes section exists, append one at the end of the dynamic part.
+        dynamic_updated = dynamic_part.strip() + "\n\n" + new_changes_summary
+    
+    # Reassemble the document: dynamic part + static part (with its header) + new commit marker.
+    updated_content = f"{dynamic_updated}\n\n{static_marker}\n{static_part.strip()}\n\n{new_commit_marker}"
     return updated_content
 
 def commit_to_documentation_branch():
@@ -167,6 +168,12 @@ Include:
 - Descriptions of key modules, functions, and components.
 - Usage examples and dependency details (if applicable).
 
+**Important Instructions:**
+- Do not include any generic placeholder text (e.g. '[briefly describe...]').
+- Do not wrap any text in '```markdown' or similar code fences.
+- Output the documentation in Markdown with clear section headers.
+- The content should be entirely specific to the code provided.
+
 The complete repository content is provided below:
 
 {complete_repo}
@@ -194,9 +201,13 @@ The changes are as follows:
 - Modified files: {changes['modified']}
 - Deleted files: {changes['deleted']}
 
-Using this context, update the existing documentation to reflect these changes.
-Ensure that you update only the relevant sections, add a "Recent Changes" section, and preserve all accurate details from the previous documentation.
-Format your response in Markdown.
+Using this context, update the documentation to accurately reflect these changes.
+**Important Instructions:**
+- Do not include any generic placeholder text or any markdown wrappers such as '```markdown'.
+- Only update the dynamic sections (such as the Overview and Recent Changes).
+- Do not repeat static sections (like Usage, Contributing, License, Contact) that are already present.
+- Provide a concise summary for the "Recent Changes" section, including a brief description of what was added, modified, or deleted.
+- Output the updated content in Markdown.
 """
         print(context)
         print(prompt)
