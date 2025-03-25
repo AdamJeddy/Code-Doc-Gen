@@ -55,21 +55,57 @@ def generate_documentation_content(context):
     return response.content
 
 def update_documentation_file(new_content, current_content=None):
-    """Update documentation file with proper version control"""
+    """
+    Updates the documentation file. If current_content exists, only update the dynamic sections:
+    - Overview and project-specific sections.
+    - "Recent Changes" section should be updated/merged without duplicating static sections.
+    """
     new_commit_marker = f"Last Documented Commit: {get_current_commit_hash()}"
     
-    if current_content:
-        # Remove old commit marker and preserve existing content
-        cleaned_content = re.sub(
-            r"\n*Last Documented Commit: [a-f0-9]+\n*$", 
-            "", 
-            current_content, 
-            flags=re.MULTILINE
-        )
-        updated_content = f"{cleaned_content}\n\n{new_content}\n\n{new_commit_marker}"
-    else:
-        updated_content = f"{new_content}\n\n{new_commit_marker}"
+    # If no current content exists, just output new content with commit marker.
+    if not current_content:
+        return f"{new_content}\n\n{new_commit_marker}"
     
+    # Otherwise, parse the current documentation into two parts:
+    # 1. The static part (e.g. Usage, Contributing, License, Contact) that should remain untouched.
+    # 2. The dynamic part (Overview, File Structure, Recent Changes) that will be updated.
+    # You can use a delimiter (e.g. a specific marker) to separate these.
+    # For example, assume the dynamic section starts with a marker "## Dynamic Content Start"
+    # and static content follows a marker "## Static Content Start".
+    
+    dynamic_marker = "## Dynamic Content Start"
+    static_marker = "## Static Content Start"
+    
+    if dynamic_marker in current_content and static_marker in current_content:
+        dynamic_part = current_content.split(static_marker)[0]
+        static_part = current_content.split(static_marker)[1]
+    else:
+        # Fallback: if no markers exist, assume the whole document is dynamic.
+        dynamic_part = current_content
+        static_part = ""
+    
+    # Remove any placeholders from new_content
+    new_content = re.sub(r"\[.*?briefly describe.*?\]", "", new_content, flags=re.IGNORECASE)
+    
+    # Update the dynamic section:
+    # Instead of appending a whole new "Recent Changes" section at the end,
+    # find an existing "Recent Changes" section and merge new changes.
+    # For example, extract the existing recent changes block if present:
+    recent_changes_pattern = r"(## Recent Changes\s*\n)(.*?)(\n## |\Z)"
+    match = re.search(recent_changes_pattern, dynamic_part, flags=re.DOTALL)
+    
+    if match:
+        header, existing_changes, tail = match.groups()
+        # Prepare new recent changes block (could be a summary of the changes)
+        new_recent_changes = f"{header}{new_content.strip()}\n"  # new changes overwrite old for demo purpose
+        # Replace the existing recent changes section with the new one.
+        updated_dynamic = re.sub(recent_changes_pattern, new_recent_changes + tail, dynamic_part, flags=re.DOTALL)
+    else:
+        # If no Recent Changes section exists, append one to the dynamic part.
+        updated_dynamic = dynamic_part.strip() + f"\n\n## Recent Changes\n{new_content.strip()}\n"
+    
+    # Combine the updated dynamic part, static part, and new commit marker.
+    updated_content = f"{updated_dynamic}\n\n## Static Content Start\n{static_part.strip()}\n\n{new_commit_marker}"
     return updated_content
 
 def commit_to_documentation_branch():
