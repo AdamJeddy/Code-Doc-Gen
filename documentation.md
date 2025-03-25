@@ -1,33 +1,29 @@
-# Code-Doc-Gen Project Documentation
+# Code-Doc-Gen Documentation
 
 ## Overview
 
-# Code-Doc-Gen Project Documentation
-
-## Overview
-
-The Code-Doc-Gen project is designed to automatically generate and update documentation for code changes in a repository. It leverages LangChain and OpenAI's GPT-4o to create detailed markdown documentation. The tool integrates with Git to detect code changes, extract a repository overview, and update documentation accordingly. It is adaptable to any project and maintains a record of updates by embedding a commit marker in the generated documentation.
+Code-Doc-Gen is a tool designed to automatically generate and update documentation for code changes in a repository. It leverages LangChain and OpenAI's GPT-4o to create comprehensive documentation by integrating with Git to detect code changes, extract repository overviews, and update documentation files. The tool is adaptable to any project and maintains a record of updates by embedding a commit marker in the generated documentation.
 
 ## Features
 
-- **Automatic Documentation Generation**: Uses GPT-4o to generate comprehensive documentation based on the repository's structure and changes.
-- **Git Integration**: Detects new commits and changes using Git logs and diffs, and commits documentation updates to a dedicated branch.
-- **Dynamic Prompt Building**: Constructs prompts for the language model based on the existence of documentation and recent changes.
-- **Commit Tracking**: Embeds a commit marker in the documentation to track the last documented commit.
-- **Extensibility**: The modular design allows for easy customization and integration with additional systems.
+- **Automatic Documentation Generation**: Detects new commits and changes using Git logs and diffs, and generates or updates documentation accordingly.
+- **LangChain Integration**: Utilizes LangChain to interface with GPT-4o for generating markdown documentation based on dynamic prompts.
+- **Git Integration**: Uses Git commands to retrieve commit logs, diffs, and to commit documentation updates.
+- **Repository Overview**: Generates an overview of up to 20 top-level files, including snippets for text files.
+- **Extensibility**: Modular design allows for easy extension or customization to suit different project needs.
 
 ## File Structure
 
 - **.gitignore**: Specifies files and directories to be ignored by Git, such as `.env`.
 - **README.md**: Provides an overview of the project, setup instructions, and usage guidelines.
-- **agent_version_doc_gen.py**: Contains the logic for generating and updating documentation using LangChain and GPT-4o.
-- **doc_gen.py**: Implements the main flow for generating documentation, handling Git operations, and updating the documentation file.
-- **file_operations.py**: Provides utility functions for reading and writing files.
-- **langchain_github_documenter.ipynb**: A Jupyter notebook for research and development of the documentation generation process.
+- **agent_version_doc_gen.py**: Contains the main logic for detecting changes, generating documentation, and committing updates.
+- **doc_gen.py**: Handles the generation and updating of documentation using GPT-4o.
+- **file_operations.py**: Provides basic file read and write operations.
+- **langchain_github_documenter.ipynb**: A Jupyter notebook for testing and R&D of the code sections.
 - **main.py**: A simple script that prints greetings to the console.
 - **math_operations.py**: Implements basic math operations such as addition, subtraction, multiplication, and division.
 - **requirements.txt**: Lists the Python dependencies required for the project.
-- **string_operations.py**: Implements basic string operations such as concatenation and case conversion.
+- **string_operations.py**: Implements basic string operations like concatenation and case conversion.
 
 ## Key Modules and Functions
 
@@ -39,7 +35,7 @@ The Code-Doc-Gen project is designed to automatically generate and update docume
 - **get_diff_since_commit**: Returns the diff of changes since the provided commit.
 - **get_structured_git_diff**: Parses git diff into structured categories: added, modified, deleted files.
 - **get_repo_overview**: Provides an overview of the repository structure and contents.
-- **run_agent**: Initializes and invokes the agent to generate or update documentation.
+- **run_agent**: Initializes and runs the agent to generate or update documentation.
 
 ### doc_gen.py
 
@@ -47,8 +43,8 @@ The Code-Doc-Gen project is designed to automatically generate and update docume
 - **get_structured_diff**: Gets structured diff since the last documented commit.
 - **generate_documentation_content**: Generates documentation using GPT-4o.
 - **update_documentation_file**: Updates the documentation file with new content and a commit marker.
-- **commit_to_documentation_branch**: Handles Git operations for the documentation branch.
-- **main_flow**: Main function to execute the documentation generation and update process.
+- **commit_to_documentation_branch**: Handles git operations for committing to the documentation branch.
+- **main_flow**: Main function to check for existing documentation, generate new content, and commit updates.
 
 ### file_operations.py
 
@@ -60,7 +56,7 @@ The Code-Doc-Gen project is designed to automatically generate and update docume
 - **add**: Returns the sum of two numbers.
 - **subtract**: Returns the difference between two numbers.
 - **multiply**: Returns the product of two numbers.
-- **divide**: Returns the quotient of two numbers, raising an error if the divisor is zero.
+- **divide**: Returns the quotient of two numbers, handling division by zero.
 
 ### string_operations.py
 
@@ -70,22 +66,56 @@ The Code-Doc-Gen project is designed to automatically generate and update docume
 
 ## Usage Examples
 
-To generate or update documentation, run the following command:
+1. **Clone the Repository**
 
-```bash
-python documentation_generator.py
-```
+   ```bash
+   git clone <repository-url>
+   cd <repository-directory>
+   ```
 
-This will check for the existence of `documentation.md`, generate or update the documentation based on recent changes, and commit the updates to the `documentation` branch.
+2. **Create a Virtual Environment and Install Dependencies**
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. **Configure Environment Variables**
+
+   Create a `.env` file in the root directory and add your OpenAI API key:
+
+   ```env
+   LANGSMITH_TRACING=true
+   LANGSMITH_ENDPOINT=<endpoint>
+   LANGSMITH_API_KEY=<key>
+   LANGSMITH_PROJECT=<project name>
+   OPENAI_API_KEY=<key>
+   ```
+
+4. **Generate or Update Documentation**
+
+   Run the documentation generation script:
+
+   ```bash
+   python documentation_generator.py
+   ```
+
+   The tool will check for existing documentation and update it based on new commits and changes.
 
 ## Dependencies
 
-The project requires the following Python packages, as specified in `requirements.txt`:
+- **langchain==0.3.21**
+- **langchain_openai==0.3.9**
+- **python-dotenv==1.0.1**
 
-- `langchain==0.3.21`
-- `langchain_openai==0.3.9`
-- `python-dotenv==1.0.1`
+Ensure all dependencies are installed by running `pip install -r requirements.txt`.
 
-Ensure these dependencies are installed in your virtual environment before running the project.
+## Troubleshooting
 
-Last Documented Commit: c27427d18057baf48192af0adcc1debc46a3571f
+- **Git Issues**: Ensure Git is installed and the repository is properly initialized.
+- **Environment Variables**: Verify that your `.env` file contains a valid OpenAI API key.
+- **Dependencies**: Confirm that all dependencies are installed by checking `requirements.txt`.
+- **Logging**: Review the logs output to the console for error messages during Git operations or documentation generation.
+
+Last Documented Commit: 729ec986a9b32756376e7cb0beb62d5c05e1dd44
