@@ -56,57 +56,39 @@ def generate_documentation_content(context):
 
 def update_documentation_file(new_content, current_content=None):
     """
-    Updates the documentation file.
-    - If no current content exists, it creates a new file with dynamic and static sections.
-    - If current content exists, it updates only the dynamic part (which includes Overview and Recent Changes)
-      and preserves the static part (Usage, Contributing, License, Contact).
-    - It also removes placeholder text and avoids duplicating the recent changes on every run.
+    Updates the documentation file by updating only the dynamic part and appending a single commit marker.
+    It removes any occurrences of the "Static Content Start" marker and ensures that the "Recent Changes" section
+    does not include duplicates or changes from the documentation file itself.
     """
-    new_commit_marker = f"Last Documented Commit: {get_current_commit_hash()}"
-    
-    # Clean up new_content: remove any placeholder markers
-    new_content = re.sub(r"\[.*?describe.*?\]", "", new_content, flags=re.IGNORECASE).strip()
+    commit_marker = f"Last Documented Commit: {get_current_commit_hash()}"
 
-    # Remove any "```markdown" wrappers from new_content
+    # Clean up new_content: remove placeholders but keep code snippets intact.
+    new_content = re.sub(r"\[.*?describe.*?\]", "", new_content, flags=re.IGNORECASE).strip()
     new_content = new_content.replace("```markdown", "")
 
-    
-    # If no existing content, create a document with clear markers:
+    # If no current content exists, create a new document with only dynamic content.
     if not current_content:
-        # Build a new document with dynamic and static sections
-        dynamic_section = new_content + "\n"
-        static_section = ""
-        return f"# Code-Doc-Gen Project Documentation\n\n{dynamic_section}{static_section}\n{new_commit_marker}"
-    
-    # Otherwise, split the current content into dynamic and static parts.
-    dynamic_marker = "## Dynamic Content Start"
-    static_marker = "## Static Content Start"
-    
-    if dynamic_marker in current_content and static_marker in current_content:
-        dynamic_part = current_content.split(static_marker)[0]
-        static_part = current_content.split(static_marker)[1]
-    else:
-        # Fallback: treat entire content as dynamic if markers are missing.
-        dynamic_part = current_content
-        static_part = ""
-    
-    # Update the "Recent Changes" section within the dynamic part:
-    # Look for an existing "## Recent Changes" header in dynamic_part.
+        return f"{new_content}\n\n{commit_marker}"
+
+    # Remove "Last Documented Commit" occurrences before reassembling.
+    current_content = re.sub(r"Last Documented Commit: [a-f0-9]+", "", current_content).strip()
+
+    # Update the "Recent Changes" section.
     recent_changes_pattern = r"(## Recent Changes\s*\n)(.*?)(?=\n##|\Z)"
-    match = re.search(recent_changes_pattern, dynamic_part, flags=re.DOTALL)
-    
-    # Build a new recent changes summary (you can extend this to include descriptions, commit messages, etc.)
-    new_changes_summary = f"### Recent Changes\n{new_content}\n"
-    
+    match = re.search(recent_changes_pattern, current_content, flags=re.DOTALL)
+
+    new_changes_summary = f"## Recent Changes\n{new_content}\n"
+
     if match:
-        # Replace the existing recent changes section with the new summary.
-        dynamic_updated = re.sub(recent_changes_pattern, new_changes_summary, dynamic_part, flags=re.DOTALL)
+        # Replace the existing "Recent Changes" section with the new summary.
+        updated_content = re.sub(recent_changes_pattern, new_changes_summary, current_content, flags=re.DOTALL)
     else:
-        # If no recent changes section exists, append one at the end of the dynamic part.
-        dynamic_updated = dynamic_part.strip() + "\n\n" + new_changes_summary
-    
-    # Reassemble the document: dynamic part + static part (with its header) + new commit marker.
-    updated_content = f"{dynamic_updated}\n\n{static_marker}\n{static_part.strip()}\n\n{new_commit_marker}"
+        # Append the recent changes section to the document.
+        updated_content = current_content + "\n\n" + new_changes_summary
+
+    # Append the single commit marker at the end.
+    updated_content = updated_content.strip() + f"\n\n{commit_marker}"
+
     return updated_content
 
 def commit_to_documentation_branch():
