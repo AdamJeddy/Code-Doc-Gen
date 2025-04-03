@@ -34,6 +34,30 @@ The tool integrates with Git to detect code changes, analyzes repository content
 
 The initial agent-based approach (`agent_version_doc_gen.py`) demonstrated functionality but had limitations in content analysis and change tracking. The current version (`doc_gen.py`) implements more robust repository analysis and maintains clearer separation between static documentation elements and dynamic updates.
 
+## Project Flow 
+
+```mermaid
+flowchart TD
+
+  A["main_flow()"] --> B{"Does documentation.md exist?"}
+  B -- Yes --> C{"Is there current content?"}
+  B -- No --> D["get_complete_repo_content()"]
+  C -- Yes --> E["get_structured_diff(last_commit)"]
+  C -- No --> D
+  E --> F["generate_documentation_content(diff context)"]
+  D --> G["generate_documentation_content(repo content)"]
+  F --> H["update_documentation_file(new_content, current_content)"]
+  G --> H
+  H --> I["commit_to_documentation_branch()"]
+  I --> J{"Success?"}
+  J -- Yes --> K["Log success"]
+  J -- No --> L["Log failure"]
+
+  %% Supporting calls
+  E --> M["get_current_commit_hash()"]
+  H --> M
+```
+
 ## Setup
 
 1. **Clone the Repository**
