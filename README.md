@@ -143,3 +143,42 @@ flowchart TD
 - **Dependencies**  
   Confirm installation with `pip freeze -r requirements.txt`
 
+
+## Questions & Answers
+
+### 📄 Output Format & Storage  
+- **Format:** Documentation is generated in **Markdown format** for easy version control and readability.  
+- **Storage Options:**  
+  - For smaller projects, documentation is stored within the repository (`docs/` folder or README updates).  
+  - For larger projects, the tool can be configured to update external platforms such as **Notion** or **Confluence** based on the system being used.  
+
+---
+
+### ⚡ Real-time Updates & Triggers  
+- **Trigger Mechanism:**  
+  - Documentation updates are triggered **only when a pull request is merged into the main branch** (typically production or pre-production).  
+  - This prevents unnecessary API calls to the LLM, optimizing resource usage and reducing compute costs.  
+- **Efficiency Considerations:**  
+  - Avoids triggering on every commit to minimize API consumption.  
+  - Supports optional **manual triggers** for specific documentation updates outside the normal workflow.  
+
+---
+
+### 🛠️ Supported Languages & Frameworks  
+- **Language-Agnostic:** Since the tool relies on **LLM-based analysis**, it can support **any programming language**.  
+- **Framework-Specific Adaptation:**  
+  - The tool detects the dominant languages in the repository and generates **framework-specific documentation** accordingly (e.g., Python with Flask/Django, JavaScript with React/Node.js).  
+
+---
+
+### 🔗 Repository Integration  
+- **Platform-Agnostic:**  
+  - The tool is **not limited to GitHub** but works with **any Git-based platform** that supports webhooks, including **GitHub, GitLab, and Bitbucket**.  
+  - This ensures broad compatibility and seamless integration across different development environments.  
+
+---
+
+### 🚀 Future Enhancements  
+- Support for multi-repository documentation aggregation.  
+- AI-powered code change summaries.  
+- Customizable documentation templates based on project type.  
