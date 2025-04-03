@@ -34,6 +34,30 @@ The tool integrates with Git to detect code changes, analyzes repository content
 
 The initial agent-based approach (`agent_version_doc_gen.py`) demonstrated functionality but had limitations in content analysis and change tracking. The current version (`doc_gen.py`) implements more robust repository analysis and maintains clearer separation between static documentation elements and dynamic updates.
 
+## Project Flow 
+
+```mermaid
+flowchart TD
+
+  A["main_flow()"] --> B{"Does documentation.md exist?"}
+  B -- Yes --> C{"Is there current content?"}
+  B -- No --> D["get_complete_repo_content()"]
+  C -- Yes --> E["get_structured_diff(last_commit)"]
+  C -- No --> D
+  E --> F["generate_documentation_content(diff context)"]
+  D --> G["generate_documentation_content(repo content)"]
+  F --> H["update_documentation_file(new_content, current_content)"]
+  G --> H
+  H --> I["commit_to_documentation_branch()"]
+  I --> J{"Success?"}
+  J -- Yes --> K["Log success"]
+  J -- No --> L["Log failure"]
+
+  %% Supporting calls
+  E --> M["get_current_commit_hash()"]
+  H --> M
+```
+
 ## Setup
 
 1. **Clone the Repository**
@@ -119,3 +143,42 @@ The initial agent-based approach (`agent_version_doc_gen.py`) demonstrated funct
 - **Dependencies**  
   Confirm installation with `pip freeze -r requirements.txt`
 
+
+## Questions & Answers
+
+### 📄 Output Format & Storage  
+- **Format:** Documentation is generated in **Markdown format** for easy version control and readability.  
+- **Storage Options:**  
+  - For smaller projects, documentation is stored within the repository (`docs/` folder or README updates).  
+  - For larger projects, the tool can be configured to update external platforms such as **Notion** or **Confluence** based on the system being used.  
+
+---
+
+### ⚡ Real-time Updates & Triggers  
+- **Trigger Mechanism:**  
+  - Documentation updates are triggered **only when a pull request is merged into the main branch** (typically production or pre-production).  
+  - This prevents unnecessary API calls to the LLM, optimizing resource usage and reducing compute costs.  
+- **Efficiency Considerations:**  
+  - Avoids triggering on every commit to minimize API consumption.  
+  - Supports optional **manual triggers** for specific documentation updates outside the normal workflow.  
+
+---
+
+### 🛠️ Supported Languages & Frameworks  
+- **Language-Agnostic:** Since the tool relies on **LLM-based analysis**, it can support **any programming language**.  
+- **Framework-Specific Adaptation:**  
+  - The tool detects the dominant languages in the repository and generates **framework-specific documentation** accordingly (e.g., Python with Flask/Django, JavaScript with React/Node.js).  
+
+---
+
+### 🔗 Repository Integration  
+- **Platform-Agnostic:**  
+  - The tool is **not limited to GitHub** but works with **any Git-based platform** that supports webhooks, including **GitHub, GitLab, and Bitbucket**.  
+  - This ensures broad compatibility and seamless integration across different development environments.  
+
+---
+
+### 🚀 Future Enhancements  
+- Support for multi-repository documentation aggregation.  
+- AI-powered code change summaries.  
+- Customizable documentation templates based on project type.  
